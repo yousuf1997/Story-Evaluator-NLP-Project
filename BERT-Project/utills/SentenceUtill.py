@@ -5,6 +5,7 @@ class SentenceUtil:
     def __int__(self):
         pass
 
+    @staticmethod
     def extractSentencesFromParagraph(self, paragraph: str) -> list:
         sentenceList = []
         charIndex = 0
@@ -24,6 +25,7 @@ class SentenceUtil:
             sentenceList.append(currentSentence)
         return sentenceList
 
+    @staticmethod
     def _isSentenceEnding(self, char:str):
         endingPunctuations = [".", ",", "!"]
         if char in endingPunctuations:
