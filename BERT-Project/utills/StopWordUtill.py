@@ -1,7 +1,7 @@
 
 '''
 
-    This class repersents stop words dictionary, and has functionality to check a word belongs to stop words
+    This class represents stop words dictionary, and has functionality to check a word belongs to stop words
     source of the words : https://countwordsfree.com/stopwords
 '''
 
@@ -134,7 +134,5 @@ class StopWordsUtill:
             currentWord = wordsList[wordsListIndex]
             if currentWord not in self._stopWordList:
                 newParagraph = newParagraph + " " + currentWord
-
             wordsListIndex = wordsListIndex + 1
-
         return newParagraph

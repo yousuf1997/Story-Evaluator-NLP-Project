@@ -5,5 +5,5 @@ class SentenceUtil:
     def __int__(self):
         pass
 
-    def extractSentencesFromParagraph(self, pragraph):
+    def extractSentencesFromParagraph(self, paragraph: str):
         pass
