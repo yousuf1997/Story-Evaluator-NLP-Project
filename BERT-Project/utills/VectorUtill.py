@@ -11,7 +11,6 @@ class VectorUtill:
 
 
     # this method computes the consine simalarity
-    @staticmethod
     def computeCosineSimilarity(self, vector1: list, vector2: list):
         vec1len = len(vector1)
         vec2len = len(vector2)

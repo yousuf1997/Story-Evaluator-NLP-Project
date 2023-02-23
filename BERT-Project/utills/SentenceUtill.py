@@ -1,11 +1,11 @@
 
 '''This class will parse paragraph into sentences'''
-class SentenceUtil:
+class SentenceUtill:
 
     def __int__(self):
         pass
 
-    @staticmethod
+
     def extractSentencesFromParagraph(self, paragraph: str) -> list:
         sentenceList = []
         charIndex = 0
@@ -20,14 +20,15 @@ class SentenceUtil:
                 sentenceList.append(currentSentence)
                 ## reset for new sentence to the
                 currentSentence = ""
+            ## append the index
+            charIndex = charIndex + 1
         ## append the last sentence
         if len(currentSentence) > 0:
             sentenceList.append(currentSentence)
         return sentenceList
 
-    @staticmethod
     def _isSentenceEnding(self, char:str):
-        endingPunctuations = [".", ",", "!"]
+        endingPunctuations = [".", "?", "!"]
         if char in endingPunctuations:
             return True
         return False
