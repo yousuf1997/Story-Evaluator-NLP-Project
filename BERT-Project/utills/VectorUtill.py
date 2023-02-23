@@ -35,3 +35,25 @@ class VectorUtill:
             vec2Squared = vec2Squared + math.pow(vector2[index], 2)
         ## cosine simularity
         return crossProduct / (math.sqrt(vec1Squared) * math.sqrt(vec2Squared))
+
+    ## this method gets list of vectors, and computes average vector
+    def computeAverageVector(self, vectors: list):
+        if len(vectors) == 0:
+            return 0.0
+
+        xIndex = 0
+        xLength = len(vectors[0])
+        yLength = len(vectors)
+        averageVector = []
+
+        while xIndex < xLength:
+            yIndex = 0
+            sum = 0.0
+            while yIndex < yLength:
+                sum = sum + vectors[yIndex][xIndex]
+                yIndex = yIndex + 1
+            average = float(sum / yIndex)
+            ## add the sum to the average vector
+            averageVector.append(average)
+            xIndex = xIndex + 1
+        return averageVector
