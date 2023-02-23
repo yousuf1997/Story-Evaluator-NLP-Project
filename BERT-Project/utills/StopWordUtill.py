@@ -131,8 +131,20 @@ class StopWordsUtill:
         newParagraph = ""
 
         while wordsListIndex < len(wordsList):
-            currentWord = wordsList[wordsListIndex]
+            currentWord = self._removePunctuations(wordsList[wordsListIndex])
             if currentWord not in self._stopWordList:
                 newParagraph = newParagraph + " " + currentWord
             wordsListIndex = wordsListIndex + 1
         return newParagraph
+
+    def _removePunctuations(self, word: str):
+        if len(word) == 0:
+            return ""
+        puntuationList = [",",":",".", "?", ";", ":", "/", "(", ")", "-"]
+        charIndex = 0
+
+        while charIndex < len(word):
+            if word[charIndex] in puntuationList:
+                word[charIndex] = ""
+            charIndex = charIndex + 1
+        return word
