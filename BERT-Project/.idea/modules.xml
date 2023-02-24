@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/BERT-Project.iml" filepath="$PROJECT_DIR$/BERT-Project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/model/model.iml" filepath="$PROJECT_DIR$/model/model.iml" />
       <module fileurl="file://$PROJECT_DIR$/utills/utills.iml" filepath="$PROJECT_DIR$/utills/utills.iml" />
     </modules>
   </component>
