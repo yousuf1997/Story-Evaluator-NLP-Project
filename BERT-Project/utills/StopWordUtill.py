@@ -8,7 +8,7 @@
 class StopWordsUtill:
     def __init__(self):
         self._stopWordList = [];
-        self._buildStopWordList()
+        self._buildStopWordMap()
 
     def _buildStopWordMap(self):
         self._stopWordList = ["able" ,"about" ,"above" ,"abroad" ,"according" ,"accordingly" ,"across" ,"actually"
@@ -140,11 +140,13 @@ class StopWordsUtill:
     def _removePunctuations(self, word: str):
         if len(word) == 0:
             return ""
+        ## lower case the word
+        word = word.lower()
         puntuationList = [",",":",".", "?", ";", ":", "/", "(", ")", "-"]
         charIndex = 0
-
+        newWord = ""
         while charIndex < len(word):
-            if word[charIndex] in puntuationList:
-                word[charIndex] = ""
+            if word[charIndex] not in puntuationList:
+                newWord = newWord + word[charIndex]
             charIndex = charIndex + 1
-        return word
+        return newWord
