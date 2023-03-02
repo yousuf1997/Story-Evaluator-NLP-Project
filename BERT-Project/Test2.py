@@ -2,7 +2,7 @@ from utills.SentenceUtill import SentenceUtill
 from utills.StopWordUtill import StopWordsUtill
 
 paragraph = "I went to college on monday. I took korahs class, he was a monster." \
-          "Today is it tuesday? Oh! my bad today is not tuesday. I was in college. Welcome to party"
+          "Today is it tuesday? Oh! my bad today is not tuesday. I was in college. Welcome to party.I am happy to be here"
 
 sentenceUtill = SentenceUtill()
 stopWordUtill = StopWordsUtill()
