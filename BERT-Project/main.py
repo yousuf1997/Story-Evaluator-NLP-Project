@@ -64,28 +64,41 @@ with torch.no_grad():
        # https://huggingface.co/transformers/model_doc/bert.html#bertmodel
        hidden_states = outputs[2]
 
+
+print ("Number of layers:", len(hidden_states), "  (initial embeddings + 12 BERT layers)")
+layer_i = 0
+
+print ("Number of batches:", len(hidden_states[layer_i]))
+batch_i = 0
+
+print ("Number of tokens:", len(hidden_states[layer_i][batch_i]))
+token_i = 0
+
+print ("Number of hidden units:", len(hidden_states[layer_i][batch_i][token_i]))
 # Concatenate the tensors for all layers. We use `stack` here to
 # create a new dimension in the tensor.
 # Concatenate the tensors for all layers. We use `stack` here to
 # create a new dimension in the tensor.
 token_embeddings = torch.stack(hidden_states, dim=0)
-
+print("TEST", len(token_embeddings))
 token_embeddings = torch.squeeze(token_embeddings, dim=1)
+print("TEST2", len(token_embeddings))
 
 token_embeddings = token_embeddings.permute(1,0,2)
+print("TEST3", len(token_embeddings))
 
 # Stores the token vectors, with shape [22 x 768]
 token_vecs_sum = []
 
 # `token_embeddings` is a [22 x 12 x 768] tensor.
-
+print("testing ", len(token_embeddings))
 # For each token in the sentence...
 for token in token_embeddings:
 
        # `token` is a [12 x 768] tensor
-
+       print("Length is ", len(token))
        # Sum the vectors from the last four layers.
-       sum_vec = torch.sum(token[-4:], dim=0)
+       sum_vec = torch.sum(token[0][-4:], dim=0)
        # Use `sum_vec` to represent `token`.
        token_vecs_sum.append(sum_vec)
 
