@@ -3,6 +3,7 @@ from transformers import BertTokenizer, BertModel
 
 from utills.SentenceUtill import SentenceUtill
 from utills.StopWordUtill import StopWordsUtill
+from utills.VectorUtill import VectorUtill
 
 '''
     This class represent the bert model for the word embedding, and all the transformation stuff happens here
@@ -15,6 +16,7 @@ class BertProcessor:
 
         # Load pre-trained model tokenizer (vocabulary)
         self._tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        self._tokenConverter = BertTokenizer.from_pretrained('bert-base-uncased')
 
         # Load pre-trained model (weights)
         self._model = BertModel.from_pretrained('bert-base-uncased',output_hidden_states = True)
@@ -26,6 +28,14 @@ class BertProcessor:
         # stopwords utils to remove stop words on each sentence
         # will do the sentence processing prior to utilizing this util
         self._STOP_WORD_UTILL = StopWordsUtill()
+
+        ## vector utils
+        self._VECTOR_UTILL = VectorUtill()
+
+
+        ## word vector list
+        self._wordVectorListByBatch = []
+
     '''
         This method will initiate the process: extract sentences, performs tokenizations, BERT evaluations, returns
         list of word vectors extracted from the BERT
@@ -54,34 +64,33 @@ class BertProcessor:
         hiddenStatesWithBatches = self._processBert(tokensTensor, segmentsTensors)
 
         # obtain word vectors by batches (sentences)
-        self._extractWordVectorsByBatches(hiddenStatesWithBatches)
+        self._extractWordVectorsByBatches(hiddenStatesWithBatches, inputIdList)
 
 
     '''This method will extract word vectors by sentences (batches)'''
-    def _extractWordVectorsByBatches(self, hiddenStatesWithBatches):
+    def _extractWordVectorsByBatches(self, hiddenStatesWithBatches, inputIdList):
 
         totalNumberOfBatches = len(hiddenStatesWithBatches[0])
         batchIndex = 0
 
         while batchIndex < totalNumberOfBatches:
-            currentBatchTokens = []
+            currentBatchHiddenStates = []
             hiddenStateIndex = 0
 
             while hiddenStateIndex < len(hiddenStatesWithBatches):
-                currentBatchTokens.append(hiddenStatesWithBatches[batchIndex])
+                currentBatchHiddenStates.append(hiddenStatesWithBatches[batchIndex])
                 hiddenStateIndex = hiddenStateIndex + 1
 
             ## compute vectors for current batch
-            self._computeWordVectorsForBatch(currentBatchTokens, batchIndex)
-
+            self._computeWordVectorsForBatch(currentBatchHiddenStates, batchIndex, inputIdList)
             batchIndex = batchIndex + 1
 
     '''This method computers word vectors for given batch'''
-    def _computeWordVectorsForBatch(self, currentBatchTokens, batchIndex):
+    def _computeWordVectorsForBatch(self, currentBatchHiddenStates, batchIndex, inputIdList):
 
         # Concatenate the tensors for all layers. We use `stack` here to
         # create a new dimension in the tensor.
-        tokenEmbeddings = torch.stack(currentBatchTokens, dim=0)
+        tokenEmbeddings = torch.stack(currentBatchHiddenStates, dim=0)
         # Remove dimension 1, the "batches".
         tokenEmbeddings = torch.squeeze(tokenEmbeddings, dim=1)
         # Swap dimensions 0 and 1.
@@ -93,11 +102,68 @@ class BertProcessor:
         for token in tokenEmbeddings:
             # `token` is a [12 x 768] tensor
             # Sum the vectors from the last four layers.
-            print("Length is ", len(token))
             sum_vec = torch.sum(token[-4:], dim=0)
             # Use `sum_vec` to represent `token`.
             tokenVectorSum.append(sum_vec)
-        ## START FROM HERE!
+
+        ## convert inputIds for current batch to tokens
+        currentBatchTokens = self._tokenConverter.convert_ids_to_tokens(inputIdList[batchIndex])
+        ## build word vector map
+        currentBatchWordVectorMap = self._buildWordVectorMapForBatch(currentBatchTokens, inputIdList, batchIndex, tokenVectorSum)
+
+        ## append to the main list
+        self._wordVectorListByBatch.append(currentBatchWordVectorMap)
+        
+
+    ''' This method builds word vector map for current batch'''
+    def _buildWordVectorMapForBatch(self, currentBatchTokens, inputIdList, batchIndex, tokenVectorSum):
+
+        index = 0
+        currentWordIdList = []
+        currentWordTokenList = []
+        wordVectorMap = {}
+
+        while index < len(currentBatchTokens):
+            currentToken = currentBatchTokens[index]
+            currentId = inputIdList[index]
+
+            if self._isItCurrentTokenIsFragmentOfAWord(currentToken):
+                ## keep adding the token and id
+                currentWordIdList.append(inputIdList[index])
+                currentWordTokenList.append(currentId)
+            else:
+                # compute word vector and remove the #'s
+                vectorsForTokens = []
+
+                for id in currentWordIdList:
+                    ## first five values of the vector
+                    vectorsForTokens.append(list(tokenVectorSum[id][:5]))
+
+                ## summ all vectors
+                vectorSum = vectorsForTokens[0]
+                index = 1
+
+                while index < len(vectorsForTokens):
+                    vectorSum = self._VECTOR_UTILL.addMatrixOfEqualSize(vectorSum, vectorsForTokens[index])
+                    index = index + 1
+
+                ## remove #'s
+                word = ""
+
+                for token in currentWordTokenList:
+                    word = word + token.replace('#', '')
+
+                ## append the word to the map
+                wordVectorMap[word] = list(vectorSum)
+
+                ## clear
+                currentWordIdList = []
+                currentWordTokenList = []
+
+        return wordVectorMap
+
+    def _isItCurrentTokenIsFragmentOfAWord(self, token:str):
+        return "#" in token
 
     '''This method process sentence with BERT, and returns the hidden states which will be used to computer word vectors'''
     def _processBert(self, tokensTensor, segmentsTensors):

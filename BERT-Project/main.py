@@ -5,8 +5,8 @@ from transformers import BertTokenizer, BertModel
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
 # Define a new example sentence with multiple meanings of the word "bank"
-text = "After stealing money from the bank vault, the bank robber was seen " \
-       "fishing on the Mississippi river bank."
+text = "After stealing money from the matsha bank vault, the bank robber was seen " \
+       "fishing on the Mississippi bikasgh river bank."
 
 text2 = "Yesterday was i went to rob the bank."
 
