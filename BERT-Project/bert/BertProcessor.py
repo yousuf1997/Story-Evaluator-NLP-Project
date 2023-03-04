@@ -36,6 +36,9 @@ class BertProcessor:
         ## word vector list
         self._wordVectorListByBatch = []
 
+    def getWordVectorListByBatch(self):
+        return self._wordVectorListByBatch
+
     '''
         This method will initiate the process: extract sentences, performs tokenizations, BERT evaluations, returns
         list of word vectors extracted from the BERT
@@ -54,7 +57,7 @@ class BertProcessor:
         inputIdList = self._processTokenization(sentenceList)
 
         ## sentence ids for each sentences
-        segmentIdList = self._buildSegmentIdList(len(inputIdList))
+        segmentIdList = self._buildSegmentIdList(len(inputIdList[0]))
 
         # Convert inputs to PyTorch tensors
         tokensTensor = torch.tensor(inputIdList)
@@ -113,7 +116,7 @@ class BertProcessor:
 
         ## append to the main list
         self._wordVectorListByBatch.append(currentBatchWordVectorMap)
-        
+        ## START FROM HERE!!
 
     ''' This method builds word vector map for current batch'''
     def _buildWordVectorMapForBatch(self, currentBatchTokens, inputIdList, batchIndex, tokenVectorSum):
@@ -132,35 +135,52 @@ class BertProcessor:
                 currentWordIdList.append(inputIdList[index])
                 currentWordTokenList.append(currentId)
             else:
-                # compute word vector and remove the #'s
-                vectorsForTokens = []
 
-                for id in currentWordIdList:
-                    ## first five values of the vector
-                    vectorsForTokens.append(list(tokenVectorSum[id][:5]))
+                self._computeWordVectorAndExtractWordFromFragments(currentWordIdList, currentWordTokenList,
+                                                                   tokenVectorSum, wordVectorMap)
+                ## clear and store the currentId and currentToken
+                currentWordIdList = [currentId]
+                currentWordTokenList = [currentToken]
 
-                ## summ all vectors
-                vectorSum = vectorsForTokens[0]
-                index = 1
+            ## increament the index
+            index = index + 1
 
-                while index < len(vectorsForTokens):
-                    vectorSum = self._VECTOR_UTILL.addMatrixOfEqualSize(vectorSum, vectorsForTokens[index])
-                    index = index + 1
-
-                ## remove #'s
-                word = ""
-
-                for token in currentWordTokenList:
-                    word = word + token.replace('#', '')
-
-                ## append the word to the map
-                wordVectorMap[word] = list(vectorSum)
-
-                ## clear
-                currentWordIdList = []
-                currentWordTokenList = []
+        ## incase if there is any left over
+        if len(currentWordIdList) > 0 and len(currentWordTokenList) > 0:
+            self._computeWordVectorAndExtractWordFromFragments(currentWordIdList, currentWordTokenList,
+                                                               tokenVectorSum, wordVectorMap)
 
         return wordVectorMap
+
+    '''
+        This method computes word vectors for word, if the words are seperated by fragments
+        it will sum up the vector values for all the fragments, and it will merge the fragments
+        into single word
+    '''
+    def _computeWordVectorAndExtractWordFromFragments(self, currentWordIdList, currentWordTokenList, tokenVectorSum, wordVectorMap):
+        # compute word vector and remove the #'s
+        vectorsForTokens = []
+
+        for id in currentWordIdList:
+            ## first five values of the vector
+            vectorsForTokens.append(list(tokenVectorSum[id][:5]))
+
+            ## summ all vectors
+        vectorSum = vectorsForTokens[0]
+        index = 1
+
+        while index < len(vectorsForTokens):
+            vectorSum = self._VECTOR_UTILL.addMatrixOfEqualSize(vectorSum, vectorsForTokens[index])
+            index = index + 1
+
+            ## remove #'s
+        word = ""
+
+        for token in currentWordTokenList:
+            word = word + token.replace('#', '')
+
+        ## append the word to the map
+        wordVectorMap[word] = list(vectorSum)
 
     def _isItCurrentTokenIsFragmentOfAWord(self, token:str):
         return "#" in token
@@ -178,7 +198,7 @@ class BertProcessor:
 
     '''This method builds segment ids for each sentence'''
     def _buildSegmentIdList(self, numberOfSentences):
-        if len(numberOfSentences) == 0:
+        if numberOfSentences == 0:
             return []
 
         sentenceIdList = []
@@ -188,12 +208,11 @@ class BertProcessor:
             sentenceIdList.append([sentenceIndex] * numberOfSentences)
             sentenceIndex = sentenceIndex + 1
 
-        return  sentenceIdList
-
+        return sentenceIdList
 
     '''This method tokenizes the sentences list, and returns inputs id list'''
     def _processTokenization(self, sentenceList):
-        if len(sentenceList):
+        if len(sentenceList) == 0:
             return []
 
         ## bert tokenizer takes sentenceList as an argument and add padding options as well
