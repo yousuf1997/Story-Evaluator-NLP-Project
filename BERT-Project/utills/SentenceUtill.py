@@ -10,7 +10,7 @@ class SentenceUtill:
         sentenceList = []
         charIndex = 0
         currentSentence = ""
-
+        print("SentenceUtill.extractSentencesFromParagraph >> Sentence processing begins.")
         while charIndex < len(paragraph):
             currentChar = paragraph[charIndex]
             ### append the charc
@@ -25,6 +25,7 @@ class SentenceUtill:
         ## append the last sentence
         if len(currentSentence) > 0:
             sentenceList.append(currentSentence)
+        print("SentenceUtill.extractSentencesFromParagraph >> Sentence processed, and total of", len(sentenceList) , "sentences found")
         return sentenceList
 
     def _isSentenceEnding(self, char:str):

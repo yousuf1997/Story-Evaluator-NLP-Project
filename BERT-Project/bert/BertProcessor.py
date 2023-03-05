@@ -79,7 +79,7 @@ class BertProcessor:
         while batchIndex < totalNumberOfBatches:
             currentBatchHiddenStates = []
             hiddenStateIndex = 0
-
+            print("BertProcessor._extractWordVectorsByBatches >> Processing Batch : ", batchIndex)
             while hiddenStateIndex < len(hiddenStatesWithBatches):
                 currentBatchHiddenStates.append(hiddenStatesWithBatches[hiddenStateIndex][batchIndex])
                 hiddenStateIndex = hiddenStateIndex + 1
@@ -94,12 +94,10 @@ class BertProcessor:
         # Concatenate the tensors for all layers. We use `stack` here to
         # create a new dimension in the tensor.
         tokenEmbeddings = torch.stack(currentBatchHiddenStates, dim=0)
-        print("tokenEmbeeding 1 ", tokenEmbeddings.size())
         # Remove dimension 1, the "batches".
         tokenEmbeddings = torch.squeeze(tokenEmbeddings, dim=1)
         # Swap dimensions 0 and 1.
         tokenEmbeddings = tokenEmbeddings.permute(1,0,2)
-        print("tokenEmbeeding 1 ", tokenEmbeddings.size())
 
         tokenVectorSum = []
         # `token_embeddings` is a [22 x 12 x 768] tensor.
@@ -113,6 +111,8 @@ class BertProcessor:
 
         ## convert inputIds for current batch to tokens
         currentBatchTokens = self._tokenConverter.convert_ids_to_tokens(inputIdList[batchIndex])
+        print("BertProcessor._computeWordVectorsForBatch >> Input Ids for current batch : ", inputIdList[batchIndex])
+        print("BertProcessor._computeWordVectorsForBatch >> Tokens for current batch : ", currentBatchTokens)
         ## build word vector map
         currentBatchWordVectorMap = self._buildWordVectorMapForBatch(currentBatchTokens, inputIdList[batchIndex], batchIndex, tokenVectorSum)
 
@@ -131,7 +131,6 @@ class BertProcessor:
         while index < len(currentBatchTokens):
             currentToken = currentBatchTokens[index]
             currentId = inputIdList[index]
-
             if self._isItCurrentTokenIsFragmentOfAWord(currentToken):
                 ## keep adding the token and id
                 currentWordIdList.append(inputIdList[index])
@@ -154,6 +153,47 @@ class BertProcessor:
 
         return wordVectorMap
 
+    ''' This method builds word vector map for current batch'''
+    def _buildWordVectorMapForBatch2(self, currentBatchTokens, inputIdList, batchIndex, tokenVectorSum):
+        index = 0
+        currentWordIdList = []
+        currentWordTokenList = []
+        wordVectorMap = {}
+        pass
+
+
+    '''
+        This method will group fragments of the word.
+        ex: wa, ##t, ##ks, walter, bus, ##s ->> [ [wa, ##t, ##ks], [walter], [bus, ##s] ]
+    '''
+    def _groupWordFragments(self, currentBatchTokens, inputIdList):
+
+        wordFragmentList = []
+        currentTokenList = []
+        index = 0
+        ## remove all default tokens
+        currentBatchTokens = self._removeDefaultTokens(currentBatchTokens)
+        print("BertProcessor._groupWordFragments >> After removing the default tokens ", currentBatchTokens)
+        while index < len(currentBatchTokens):
+            currentToken = currentBatchTokens[index]
+            currentTokenList.append(currentToken)
+            ## traverse subsequent list to check for fragments
+            index = index + 1
+            fragmentEnded = False
+            while fragmentEnded == False and index < len(currentBatchTokens):
+                if self._isItCurrentTokenIsFragmentOfAWord(currentBatchTokens[index]):
+                    ## keep adding
+                    currentTokenList.append(currentBatchTokens[index])
+                    index = index + 1
+                else:
+                    ## not a fragment any more
+                    ## push the current Tokens list to the wordFragmentList
+                    wordFragmentList.append(currentTokenList)
+                    currentTokenList = []
+                    fragmentEnded = True
+        print("BertProcessor._groupWordFragments >> Grouped Fragments", wordFragmentList)
+        return wordFragmentList
+
     '''
         This method computes word vectors for word, if the words are seperated by fragments
         it will sum up the vector values for all the fragments, and it will merge the fragments
@@ -165,17 +205,16 @@ class BertProcessor:
 
         # compute word vector and remove the #'s
         vectorsForTokens = []
-
-        for index,id in enumerate(currentWordIdList):
+        for index in range(len(currentWordTokenList)):
             ## first five values of the vector
+            currentToken = str(currentWordTokenList[index])
             vectorsForTokens.append(tokenVectorSum[index][:5])
 
-            ## summ all vectors
-        vectorSum = vectorsForTokens[0]
+    ## summ all vectors
+        vectorSum = vectorsForTokens[0].tolist()
         index = 1
-
         while index < len(vectorsForTokens):
-            vectorSum = self._VECTOR_UTILL.addMatrixOfEqualSize(vectorSum, vectorsForTokens[index])
+            vectorSum = self._VECTOR_UTILL.addMatrixOfEqualSize(vectorSum, vectorsForTokens[index].tolist())
             index = index + 1
 
             ## remove #'s
@@ -192,37 +231,36 @@ class BertProcessor:
 
     '''This method process sentence with BERT, and returns the hidden states which will be used to computer word vectors'''
     def _processBert(self, tokensTensor, segmentsTensors):
-
+        print("BertProcessor._processBert >> About evaluate sentences.")
         with torch.no_grad():
             outputs = self._model(tokensTensor, segmentsTensors)
 
             # Evaluating the model will return a different number of objects based on
             hiddenStatesWithBatches = outputs[2]
-
-        return  hiddenStatesWithBatches
+        print("BertProcessor._processBert >> Evaluated, and total of", len(hiddenStatesWithBatches[0]), "batches found.")
+        return hiddenStatesWithBatches
 
     '''This method builds segment ids for each sentence'''
     def _buildSegmentIdList(self, numberOfSentences, lengthOfTokenArray):
         if numberOfSentences == 0 or lengthOfTokenArray == 0:
             return []
-
         sentenceIdList = []
         sentenceIndex = 0
 
         while sentenceIndex < numberOfSentences:
             sentenceIdList.append([sentenceIndex] * lengthOfTokenArray)
             sentenceIndex = sentenceIndex + 1
-
+        print("BertProcessor._buildSegmentIdList >> Sentence Id list are built")
         return sentenceIdList
 
     '''This method tokenizes the sentences list, and returns inputs id list'''
     def _processTokenization(self, sentenceList):
         if len(sentenceList) == 0:
             return []
-
+        print("BertProcessor._processTokenization >> Tokenization begins.")
         ## bert tokenizer takes sentenceList as an argument and add padding options as well
         bertTokenizer = self._tokenizer(sentenceList, padding=True)
-
+        print("BertProcessor._processTokenization >> Tokenization ends.")
         return bertTokenizer["input_ids"]
 
 
@@ -239,4 +277,8 @@ class BertProcessor:
             tokens.append(self._tokenizer.tokenize(currentSentence))
             sentenceListIndex = sentenceListIndex + 1
         return tokens
+
+    def _removeDefaultTokens(self, currentBatchTokens):
+        return list(filter(lambda x: (x != "[CLS]" and x != "[SEP]" and x != "[PAD]"), currentBatchTokens))
+
 
