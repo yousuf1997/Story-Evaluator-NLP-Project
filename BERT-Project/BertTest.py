@@ -9,3 +9,5 @@ paragraph = "After stealing money from the bank vault, the bank robber was seen 
 bertProcessor.process(paragraph)
 
 print(bertProcessor.getWordVectorListByBatch())
+
+### vector values are same for all the words, Need to check the bug!
