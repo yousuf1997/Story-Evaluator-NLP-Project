@@ -57,7 +57,7 @@ class BertProcessor:
         inputIdList = self._processTokenization(sentenceList)
 
         ## sentence ids for each sentences
-        segmentIdList = self._buildSegmentIdList(len(inputIdList[0]))
+        segmentIdList = self._buildSegmentIdList(len(inputIdList),len(inputIdList[0]))
 
         # Convert inputs to PyTorch tensors
         tokensTensor = torch.tensor(inputIdList)
@@ -73,7 +73,7 @@ class BertProcessor:
     '''This method will extract word vectors by sentences (batches)'''
     def _extractWordVectorsByBatches(self, hiddenStatesWithBatches, inputIdList):
 
-        totalNumberOfBatches = len(hiddenStatesWithBatches[0])
+        totalNumberOfBatches = len(inputIdList)
         batchIndex = 0
 
         while batchIndex < totalNumberOfBatches:
@@ -81,7 +81,7 @@ class BertProcessor:
             hiddenStateIndex = 0
 
             while hiddenStateIndex < len(hiddenStatesWithBatches):
-                currentBatchHiddenStates.append(hiddenStatesWithBatches[batchIndex])
+                currentBatchHiddenStates.append(hiddenStatesWithBatches[hiddenStateIndex][batchIndex])
                 hiddenStateIndex = hiddenStateIndex + 1
 
             ## compute vectors for current batch
@@ -94,10 +94,12 @@ class BertProcessor:
         # Concatenate the tensors for all layers. We use `stack` here to
         # create a new dimension in the tensor.
         tokenEmbeddings = torch.stack(currentBatchHiddenStates, dim=0)
+        print("tokenEmbeeding 1 ", tokenEmbeddings.size())
         # Remove dimension 1, the "batches".
         tokenEmbeddings = torch.squeeze(tokenEmbeddings, dim=1)
         # Swap dimensions 0 and 1.
         tokenEmbeddings = tokenEmbeddings.permute(1,0,2)
+        print("tokenEmbeeding 1 ", tokenEmbeddings.size())
 
         tokenVectorSum = []
         # `token_embeddings` is a [22 x 12 x 768] tensor.
@@ -112,7 +114,7 @@ class BertProcessor:
         ## convert inputIds for current batch to tokens
         currentBatchTokens = self._tokenConverter.convert_ids_to_tokens(inputIdList[batchIndex])
         ## build word vector map
-        currentBatchWordVectorMap = self._buildWordVectorMapForBatch(currentBatchTokens, inputIdList, batchIndex, tokenVectorSum)
+        currentBatchWordVectorMap = self._buildWordVectorMapForBatch(currentBatchTokens, inputIdList[batchIndex], batchIndex, tokenVectorSum)
 
         ## append to the main list
         self._wordVectorListByBatch.append(currentBatchWordVectorMap)
@@ -158,12 +160,15 @@ class BertProcessor:
         into single word
     '''
     def _computeWordVectorAndExtractWordFromFragments(self, currentWordIdList, currentWordTokenList, tokenVectorSum, wordVectorMap):
+        if len(currentWordIdList) == 0:
+            return
+
         # compute word vector and remove the #'s
         vectorsForTokens = []
 
-        for id in currentWordIdList:
+        for index,id in enumerate(currentWordIdList):
             ## first five values of the vector
-            vectorsForTokens.append(list(tokenVectorSum[id][:5]))
+            vectorsForTokens.append(tokenVectorSum[index][:5])
 
             ## summ all vectors
         vectorSum = vectorsForTokens[0]
@@ -197,15 +202,15 @@ class BertProcessor:
         return  hiddenStatesWithBatches
 
     '''This method builds segment ids for each sentence'''
-    def _buildSegmentIdList(self, numberOfSentences):
-        if numberOfSentences == 0:
+    def _buildSegmentIdList(self, numberOfSentences, lengthOfTokenArray):
+        if numberOfSentences == 0 or lengthOfTokenArray == 0:
             return []
 
         sentenceIdList = []
         sentenceIndex = 0
 
         while sentenceIndex < numberOfSentences:
-            sentenceIdList.append([sentenceIndex] * numberOfSentences)
+            sentenceIdList.append([sentenceIndex] * lengthOfTokenArray)
             sentenceIndex = sentenceIndex + 1
 
         return sentenceIdList
