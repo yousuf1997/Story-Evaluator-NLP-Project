@@ -202,8 +202,6 @@ class BertProcessor:
     def _computeWordVectorAndExtractWordFromFragments(self, tokenIndex, currentWordTokenList, tokenVectorSum, wordVectorMap):
 
         # compute word vector and remove the #'s
-        print("Token list --->> ", len(currentWordTokenList))
-        print("tokenVectorSum list --->> ", len(tokenVectorSum))
         vectorsForTokens = []
         index = 0
         while index < len(currentWordTokenList):
@@ -221,12 +219,10 @@ class BertProcessor:
 
             ## remove #'s
         word = ""
-        print("Summed Vecotrs ", vectorSum)
         for token in currentWordTokenList:
             word = word + token.replace('#', '')
 
         ## append the word to the map
-        print("WORD!!! ", word)
         wordVectorMap[word] = list(vectorSum)
         return tokenIndex
 
