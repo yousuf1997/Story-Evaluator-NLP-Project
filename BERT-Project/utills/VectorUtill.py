@@ -58,12 +58,16 @@ class VectorUtill:
             xIndex = xIndex + 1
         return averageVector
 
-        '''The following method adds two equal size matrix'''
-    def addMatrixOfEqualSize(self,matrix1, matrix2):
-        rMatrix = []
-        for k in range(len(matrix1)):
-            row = []
-            for m in range(len(matrix1[0])):
-                row.append(float(matrix1[k][m] + matrix2[k][m]))
-            rMatrix.append(row)
-        return rMatrix
+        '''The following method adds two equal size vector'''
+    def addVectorOfEqualSize(self,vector1, vector2):
+        if len(vector1) == 0 and len(vector2) == 0:
+            return []
+        if len(vector1) == 0 and len(vector2) != 0:
+            return vector2
+        if len(vector1) != 0 and len(vector2) == 0:
+            return vector1
+        length = len(vector2)
+        rVector = []
+        for i in range(length):
+            rVector.append(float(vector1[i] + vector2[i]))
+        return rVector
