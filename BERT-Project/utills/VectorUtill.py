@@ -58,7 +58,7 @@ class VectorUtill:
             xIndex = xIndex + 1
         return averageVector
 
-        '''The following method adds two equal size vector'''
+    '''The following method adds two equal size vector'''
     def addVectorOfEqualSize(self,vector1, vector2):
         if len(vector1) == 0 and len(vector2) == 0:
             return []

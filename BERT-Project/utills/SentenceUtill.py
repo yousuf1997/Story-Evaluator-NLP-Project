@@ -15,7 +15,7 @@ class SentenceUtill:
             currentChar = paragraph[charIndex]
             ### append the charc
             currentSentence = currentSentence + currentChar
-            if self._isSentenceEnding(currentChar):
+            if self.isSentenceEnding(currentChar):
                 ## push the sentence to the list
                 sentenceList.append(currentSentence)
                 ## reset for new sentence to the
@@ -26,9 +26,10 @@ class SentenceUtill:
         if len(currentSentence) > 0:
             sentenceList.append(currentSentence)
         print("SentenceUtill.extractSentencesFromParagraph >> Sentence processed, and total of", len(sentenceList) , "sentences found")
+        print("SentenceUtill.extractSentencesFromParagraph >> Sentence processed, and total of", sentenceList)
         return sentenceList
 
-    def _isSentenceEnding(self, char:str):
+    def isSentenceEnding(self, char:str):
         endingPunctuations = [".", "?", "!"]
         if char in endingPunctuations:
             return True

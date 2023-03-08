@@ -1,13 +1,17 @@
 from bert.BertProcessor import BertProcessor
+from evaluator.StoryQualityEvaluator import StoryQualityEvaluator
+from utills.VectorUtill import VectorUtill
+from scipy.spatial.distance import cosine
 
-bertProcessor = BertProcessor()
+## bertProcessor = BertProcessor()
+storyQualityEvaluator = StoryQualityEvaluator()
 
-paragraph = "After stealing money from the bank vault, the bank robber was seen " \
-       "fishing on the Mississippi river bank. Yesterday was i went to rob the bank." \
-       "John got good career, ankdhd making bank kutikas."
+vector = VectorUtill()
 
-bertProcessor.process(paragraph)
-
-print(bertProcessor.getWordVectorListByBatch())
-
-### vector values are same for all the words, Need to check the bug!
+paragraph = "welcome to the bank vault." \
+            "The bank robber was seen fishing on the Mississippi river bank." \
+            "I just have credit card of bank of america." \
+            "I just have credit card of bank of america." \
+             "Yesterday was i went to rob the bank." \
+            "Yesterday was i went to rob the bank."
+storyQualityEvaluator.initiateBertProcess(paragraph)

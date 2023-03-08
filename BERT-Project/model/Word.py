@@ -7,7 +7,5 @@ import dataclasses
 @dataclasses
 class Word:
     wordText: str
-    token: str ### this token is created after feeding the sentence to the tokenizer!
-    tokenId:int
-    segmentId: int
-    positionInSentence: int
+    sentenceId: int
+    wordPositionInSentence: int

@@ -121,6 +121,7 @@ for token in token_embeddings:
 
 
 
+print("TET ", len(token_vecs_sum))
 print('First 5 vector values for each instance of "bank".')
 print('')
 print("bank vault   ", str(token_vecs_sum[6][:5]))

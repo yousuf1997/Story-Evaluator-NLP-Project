@@ -123,6 +123,9 @@ class StopWordsUtill:
             ,"'ve" ,"vol" ,"vols" ,"wed" ,"whats" ,"wheres" ,"whim" ,"whod" ,"whos" ,"widely" ,"words"
             ,"world" ,"youd" ,"youre"]
 
+    def isStopWord(self, word):
+        return word in self._stopWordList
+
     def removeStopWords(self, paragraph :str) -> str:
         if len(paragraph) == 0:
             return ""
@@ -132,7 +135,7 @@ class StopWordsUtill:
 
         while wordsListIndex < len(wordsList):
             currentWord = self._removePunctuations(wordsList[wordsListIndex])
-            if currentWord not in self._stopWordList:
+            if not self.isStopWord(currentWord):
                 newParagraph = newParagraph + " " + currentWord
             wordsListIndex = wordsListIndex + 1
         return newParagraph
