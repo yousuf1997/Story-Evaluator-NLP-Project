@@ -110,7 +110,6 @@ class BertProcessor:
         ## currentBatchWordVectorMap = self._buildWordVectorMapForBatch(currentBatchTokens, inputIdList[batchIndex], batchIndex, tokenVectorSum)
         currentBatchWordVectorMap = self._buildWordVectorMapForBatch2(currentBatchTokens, inputIdList[batchIndex], batchIndex, tokenVectorSum)
         ## append to the main list
-        print("Current ->> ", currentBatchWordVectorMap)
         self._wordVectorListByBatch.append(currentBatchWordVectorMap)
 
     ''' This method builds word vector map for current batch'''

@@ -53,10 +53,13 @@ class StoryQualityEvaluator:
         return nonStopWordBatchList
 
     def _appendComputedBatches(self, rawBatchList, nonStopWordBatchList, wordVectorList):
-        computedSentences = {}
-        computedSentences["raw_batch"] = rawBatchList
-        computedSentences["non_stop_word_batch"] = nonStopWordBatchList
-        computedSentences["vector_values"] = wordVectorList
-        self._bertComputedSentences.append(computedSentences)
+        index = 0
+        while index < len(rawBatchList):
+            computedSentences = {}
+            computedSentences["raw_batch"] = rawBatchList[index]
+            computedSentences["non_stop_word_batch"] = nonStopWordBatchList[index]
+            computedSentences["vector_values"] = wordVectorList[index]
+            self._bertComputedSentences.append(computedSentences)
+            index = index + 1
 
 
