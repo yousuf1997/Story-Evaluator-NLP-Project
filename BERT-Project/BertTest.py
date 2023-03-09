@@ -15,3 +15,5 @@ paragraph = "welcome to the bank vault." \
              "Yesterday was i went to rob the bank." \
             "Yesterday was i went to rob the bank."
 storyQualityEvaluator.initiateBertProcess(paragraph)
+
+storyQualityEvaluator.computeMovingCosineSimilarity()

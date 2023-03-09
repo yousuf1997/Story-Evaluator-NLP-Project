@@ -71,3 +71,29 @@ class VectorUtill:
         for i in range(length):
             rVector.append(float(vector1[i] + vector2[i]))
         return rVector
+
+        ## helper method to perform vector arithmetic
+    def performVectorArthimetic(self,vector1, vector2, operation):
+        if len(vector1) == 0 and len(vector2) == 0:
+            return []
+        if len(vector1) == 0 and len(vector2) != 0:
+            return vector2
+        if len(vector1) != 0 and len(vector2) == 0:
+            return vector1
+
+        vecIndex1 = 0
+        vecIndex2 = 0
+        result = []
+
+        while vecIndex1 < len(vector1) and vecIndex2 < len(vector2):
+            result.append(self._operation(vector1[vecIndex1], vector2[vecIndex2], operation))
+            vecIndex1 = vecIndex1 + 1
+            vecIndex2 = vecIndex2 + 1
+
+        return result
+
+    def _operation(self, num1, num2, operation):
+        if operation == "ADD":
+            return num1 + num2
+        if operation == "SUB":
+            return num1 - num2
