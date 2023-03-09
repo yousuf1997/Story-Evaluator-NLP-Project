@@ -31,8 +31,8 @@ class VectorUtill:
         squareRootAndMultiplied = 0
         for index in range(len(vector1)):
             crossProduct = crossProduct + vector1[index] * vector2[index]
-            vec1Squared = vec1Squared + math.pow(vector1[index], 2)
-            vec2Squared = vec2Squared + math.pow(vector2[index], 2)
+            vec1Squared = float(vec1Squared + math.pow(vector1[index], 2))
+            vec2Squared = float(vec2Squared + math.pow(vector2[index], 2))
         ## cosine simularity
         return crossProduct / (math.sqrt(vec1Squared) * math.sqrt(vec2Squared))
 
@@ -97,3 +97,9 @@ class VectorUtill:
             return num1 + num2
         if operation == "SUB":
             return num1 - num2
+
+    def meanVector(self, vector, divider):
+        mean = []
+        for val in vector:
+            mean.append(float(val / divider))
+        return mean

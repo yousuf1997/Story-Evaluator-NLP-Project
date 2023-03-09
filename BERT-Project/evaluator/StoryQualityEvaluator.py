@@ -56,28 +56,37 @@ class StoryQualityEvaluator:
         ## add all vectors in the first sentence
         sumVector = []
         wordVectorList = self._bertComputedSentences[0]["vector_values"]
+        meanDivider = 0
         for wordVector in wordVectorList:
             ## get the vector
             keys = wordVector.keys()
             for key in keys:
                 sumVector = self._VECTOR_UTILL.performVectorArthimetic(sumVector, wordVector[key], "ADD")
+                meanDivider = meanDivider + 1
 
         while sentenceIndex < len(self._bertComputedSentences):
             ## in the current sentence traverse the vector
             wordVectorList = self._bertComputedSentences[sentenceIndex]["vector_values"]
+            print("Total vectors", len(wordVectorList))
             cosineSimilarityList = []
             for wordVector in wordVectorList:
                 ## get the vector
                 keys = wordVector.keys()
+                print("keys ", len(keys))
                 for key in keys:
                     ## compute moving cosine
-                    cosineSimilarity = self._VECTOR_UTILL.computeCosineSimilarity(sumVector, wordVector[key])
+                    print("current key", key, " vector ", wordVector[key])
+                    cosineSimilarity = self._VECTOR_UTILL.computeCosineSimilarity(self._VECTOR_UTILL.meanVector(sumVector, meanDivider), wordVector[key])
                     ## add the current vector into the word vector for next computation
                     sumVector = self._VECTOR_UTILL.performVectorArthimetic(sumVector, wordVector[key], "ADD")
                     ## add the similarity to the list
-                    cosineSimilarityList.append(cosineSimilarity)
+                    cosineSimilarityList.append(key+"_"+str(cosineSimilarity))
+                    ## increament mean divider
+                    meanDivider = meanDivider + 1
+
             ## add the cosine list to the bert sentence list
             self._bertComputedSentences[sentenceIndex]["moving_cosine_similarity"].append(cosineSimilarityList)
+            print("current cosine", cosineSimilarityList)
             ## append next index
             sentenceIndex = sentenceIndex + 1
         print(self._bertComputedSentences)
