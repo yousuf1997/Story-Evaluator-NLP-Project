@@ -13,6 +13,7 @@ class EntityRemoverUtill:
     def __init__(self):
         self._ENTITY_ANALYZER = spacy.load('en_core_web_sm')
 
+    '''This method will receive at max 3 sentences, and removes the entities in them'''
     def removeEntities(self, sentenceList):
         if len(sentenceList) == 0:
             return []
@@ -21,6 +22,8 @@ class EntityRemoverUtill:
             document = self._ENTITY_ANALYZER(sentence)
             nonEntitySentences.append(self._removeEntities(sentence, document))
         return nonEntitySentences
+
+    '''This method will remove all the entities in the sentences'''
     def _removeEntities(self, sentence : str, document):
         if len(sentence) == 0:
             return ""
