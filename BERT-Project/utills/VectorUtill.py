@@ -14,6 +14,8 @@ class VectorUtill:
     def computeCosineSimilarity(self, vector1: list, vector2: list):
         vec1len = len(vector1)
         vec2len = len(vector2)
+        if vec1len == 0:
+            return vector2
         ## make sure both of the vectors are same size
         ## otherwise append zeros if they are not same
         if vec1len != vec2len:

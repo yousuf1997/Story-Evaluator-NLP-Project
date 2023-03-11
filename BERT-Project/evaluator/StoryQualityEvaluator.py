@@ -5,6 +5,7 @@
     as BertProcessor and other utills
 '''
 from bert.BertProcessor import BertProcessor
+from utills.EntityRemoverUtill import EntityRemoverUtill
 from utills.SentenceUtill import SentenceUtill
 from utills.StopWordUtill import StopWordsUtill
 from utills.VectorUtill import VectorUtill
@@ -20,6 +21,8 @@ class StoryQualityEvaluator:
         self._STOP_WORD_UTILL = StopWordsUtill()
         # sentence utils for extracting the sentences from the paragraph
         self._SENTENCE_UTIL = SentenceUtill()
+        # entity remover utill
+        self._ENTITY_REMOVER_UTILL = EntityRemoverUtill()
         # vector utils
         self._VECTOR_UTILL = VectorUtill();
         # batch
@@ -42,9 +45,10 @@ class StoryQualityEvaluator:
         while index < len(sentenceList):
             rawBatchList = sentenceList[index:index+3]
             nonStopWordBatchList = self._removeStopWordsForBatch(rawBatchList)
-            self.bert.process(nonStopWordBatchList)
+            nonEntityBatchList = self._ENTITY_REMOVER_UTILL.removeEntities(nonStopWordBatchList)
+            self.bert.process(nonEntityBatchList)
             wordVectorList = self.bert.getWordVectorListByBatch()
-            self._appendComputedBatches(rawBatchList, nonStopWordBatchList, wordVectorList)
+            self._appendComputedBatches(rawBatchList, nonStopWordBatchList, nonEntityBatchList, wordVectorList)
             index = index + 3
 
     '''WIP : this has some issue! need to check the vector addition!'''
@@ -56,13 +60,13 @@ class StoryQualityEvaluator:
         ## add all vectors in the first sentence
         sumVector = []
         wordVectorList = self._bertComputedSentences[0]["vector_values"]
-        meanDivider = 0
-        for wordVector in wordVectorList:
-            ## get the vector
-            keys = wordVector.keys()
-            for key in keys:
-                sumVector = self._VECTOR_UTILL.performVectorArthimetic(sumVector, wordVector[key], "ADD")
-                meanDivider = meanDivider + 1
+        meanDivider = 1
+        # for wordVector in wordVectorList:
+        #     ## get the vector
+        #     keys = wordVector.keys()
+        #     for key in keys:
+        #         sumVector = self._VECTOR_UTILL.performVectorArthimetic(sumVector, wordVector[key], "ADD")
+        #         meanDivider = meanDivider + 1
 
         while sentenceIndex < len(self._bertComputedSentences):
             ## in the current sentence traverse the vector
@@ -75,7 +79,6 @@ class StoryQualityEvaluator:
                 print("keys ", len(keys))
                 for key in keys:
                     ## compute moving cosine
-                    print("current key", key, " vector ", wordVector[key])
                     cosineSimilarity = self._VECTOR_UTILL.computeCosineSimilarity(self._VECTOR_UTILL.meanVector(sumVector, meanDivider), wordVector[key])
                     ## add the current vector into the word vector for next computation
                     sumVector = self._VECTOR_UTILL.performVectorArthimetic(sumVector, wordVector[key], "ADD")
@@ -97,12 +100,13 @@ class StoryQualityEvaluator:
             nonStopWordBatchList.append(self._STOP_WORD_UTILL.removeStopWords(batch))
         return nonStopWordBatchList
 
-    def _appendComputedBatches(self, rawBatchList, nonStopWordBatchList, wordVectorList):
+    def _appendComputedBatches(self, rawBatchList, nonStopWordBatchList, nonEntityBatchList, wordVectorList):
         index = 0
         while index < len(rawBatchList):
             computedSentences = {}
             computedSentences["raw_batch"] = rawBatchList[index]
             computedSentences["non_stop_word_batch"] = nonStopWordBatchList[index]
+            computedSentences["non_entity_batch"] = nonEntityBatchList[index]
             computedSentences["vector_values"] = wordVectorList[index]
             computedSentences["moving_cosine_similarity"] = []
             self._bertComputedSentences.append(computedSentences)
