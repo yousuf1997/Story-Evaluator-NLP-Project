@@ -9,7 +9,9 @@ from utills.EntityRemoverUtill import EntityRemoverUtill
 from utills.SentenceUtill import SentenceUtill
 from utills.StopWordUtill import StopWordsUtill
 from utills.VectorUtill import VectorUtill
-
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 class StoryQualityEvaluator:
 
@@ -60,13 +62,13 @@ class StoryQualityEvaluator:
         ## add all vectors in the first sentence
         sumVector = []
         wordVectorList = self._bertComputedSentences[0]["vector_values"]
-        meanDivider = 1
-        # for wordVector in wordVectorList:
-        #     ## get the vector
-        #     keys = wordVector.keys()
-        #     for key in keys:
-        #         sumVector = self._VECTOR_UTILL.performVectorArthimetic(sumVector, wordVector[key], "ADD")
-        #         meanDivider = meanDivider + 1
+        meanDivider = 0
+        for wordVector in wordVectorList:
+            ## get the vector
+            keys = wordVector.keys()
+            for key in keys:
+                sumVector = self._VECTOR_UTILL.performVectorArthimetic(sumVector, wordVector[key], "ADD")
+                meanDivider = meanDivider + 1
 
         while sentenceIndex < len(self._bertComputedSentences):
             ## in the current sentence traverse the vector
@@ -83,16 +85,36 @@ class StoryQualityEvaluator:
                     ## add the current vector into the word vector for next computation
                     sumVector = self._VECTOR_UTILL.performVectorArthimetic(sumVector, wordVector[key], "ADD")
                     ## add the similarity to the list
-                    cosineSimilarityList.append(key+"_"+str(cosineSimilarity))
+                    ##cosineSimilarityList.append(key+"_"+str(cosineSimilarity))
+                    cosineSimilarityList.append(str(cosineSimilarity))
                     ## increament mean divider
                     meanDivider = meanDivider + 1
 
             ## add the cosine list to the bert sentence list
-            self._bertComputedSentences[sentenceIndex]["moving_cosine_similarity"].append(cosineSimilarityList)
+            self._bertComputedSentences[sentenceIndex]["moving_cosine_similarity"] = cosineSimilarityList
             print("current cosine", cosineSimilarityList)
             ## append next index
             sentenceIndex = sentenceIndex + 1
         print(self._bertComputedSentences)
+
+    def plotCosineSimilaritiesBySentenceWord(self):
+        x_axis = []
+        y_axis = []
+        for index, sentenceData in enumerate(self._bertComputedSentences):
+            cosineSimList = sentenceData['moving_cosine_similarity']
+            wordList = sentenceData["vector_values"]
+            for wordIndex,cosineData in enumerate(cosineSimList):
+                x_axis.append(str(index) + "_" + list(wordList[wordIndex].keys())[0])
+                y_axis.append(float(cosineData))
+        ## sort
+        ## plot the graph
+        # data
+        copyList = y_axis.copy()
+        copyList.sort()
+        plt.bar(range(len(x_axis)), y_axis, color='blue')
+        plt.xticks(ticks=range(len(x_axis)), labels=x_axis)
+        plt.show()
+
 
     def _removeStopWordsForBatch(self, rawBatchList):
         nonStopWordBatchList = []
