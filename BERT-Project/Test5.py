@@ -1,13 +1,5 @@
-import matplotlib.pyplot as plt
+import numpy as np
 
-numbers = [1,-2,-1.6,0,6]
+a = np.array([[1, 2],[1,2]])
 
-def bar_chart(numbers, labels, pos):
-    plt.bar(pos, numbers, color='blue')
-    plt.xticks(ticks=pos, labels=labels)
-    plt.show()
-
-
-labels = ['Electric', 'Solar', 'Diesel', 'Unleaded', "Watever"]
-pos = list(range(5))
-bar_chart(numbers, labels, pos)
+print(np.mean(a,axis=0,dtype=np.float64).tolist())

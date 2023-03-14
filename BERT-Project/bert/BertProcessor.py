@@ -239,7 +239,7 @@ class BertProcessor:
         while sentenceListIndex < len(sentenceList):
             ## remove stop words from the sentence
             currentSentence = self._STOP_WORD_UTILL.removeStopWords(sentenceList[sentenceListIndex])
-            tokens.append(self._tokenizer.tokenize(currentSentence))
+            tokens.append(self._tokenizer.tokenize(currentSentence, max_length=1024))
             sentenceListIndex = sentenceListIndex + 1
         return tokens
 

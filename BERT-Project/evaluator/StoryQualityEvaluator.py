@@ -53,7 +53,6 @@ class StoryQualityEvaluator:
             self._appendComputedBatches(rawBatchList, nonStopWordBatchList, nonEntityBatchList, wordVectorList)
             index = index + 3
 
-    '''WIP : this has some issue! need to check the vector addition!'''
     def computeMovingCosineSimilarity(self):
 
         ## start from second sentence
@@ -61,38 +60,47 @@ class StoryQualityEvaluator:
 
         ## add all vectors in the first sentence
         sumVector = []
-        wordVectorList = self._bertComputedSentences[0]["vector_values"]
-        meanDivider = 0
-        for wordVector in wordVectorList:
-            ## get the vector
-            keys = wordVector.keys()
-            for key in keys:
-                sumVector = self._VECTOR_UTILL.performVectorArthimetic(sumVector, wordVector[key], "ADD")
-                meanDivider = meanDivider + 1
+        # wordVectorList = self._bertComputedSentences[1]["vector_values"]
+        meanDivider = 1
+        meanVector = []
+        # for wordVector in wordVectorList:
+        #     ## get the vector
+        #     keys = wordVector.keys()
+        #     for key in keys:
+        #         sumVector = self._VECTOR_UTILL.performVectorArthimetic(sumVector, wordVector[key], "ADD")
+        #         meanDivider = meanDivider + 1
+        # sumVector = list(list(wordVectorList["vector_values"][0].keys())[0])
 
         while sentenceIndex < len(self._bertComputedSentences):
             ## in the current sentence traverse the vector
             wordVectorList = self._bertComputedSentences[sentenceIndex]["vector_values"]
-            print("Total vectors", len(wordVectorList))
             cosineSimilarityList = []
             for wordVector in wordVectorList:
                 ## get the vector
                 keys = wordVector.keys()
-                print("keys ", len(keys))
                 for key in keys:
                     ## compute moving cosine
                     cosineSimilarity = self._VECTOR_UTILL.computeCosineSimilarity(self._VECTOR_UTILL.meanVector(sumVector, meanDivider), wordVector[key])
                     ## add the current vector into the word vector for next computation
                     sumVector = self._VECTOR_UTILL.performVectorArthimetic(sumVector, wordVector[key], "ADD")
+
+                    ##testing code
+                    if len(meanVector) == 0:
+                        ## push the current vector into the meanvector
+                        meanVector.append(wordVector[key])
+                    meanVectorValue = np.mean(meanVector ,axis=0,dtype=np.float64).tolist()
+                    cosineSimilarityTest = self._VECTOR_UTILL.computeCosineSimilarity(meanVectorValue, wordVector[key])
+                    ## append the current key for next processing
+                    meanVector.append(wordVector[key])
+
                     ## add the similarity to the list
                     ##cosineSimilarityList.append(key+"_"+str(cosineSimilarity))
-                    cosineSimilarityList.append(str(cosineSimilarity))
+                    cosineSimilarityList.append(float(cosineSimilarityTest))
                     ## increament mean divider
                     meanDivider = meanDivider + 1
 
             ## add the cosine list to the bert sentence list
             self._bertComputedSentences[sentenceIndex]["moving_cosine_similarity"] = cosineSimilarityList
-            print("current cosine", cosineSimilarityList)
             ## append next index
             sentenceIndex = sentenceIndex + 1
         print(self._bertComputedSentences)

@@ -134,13 +134,13 @@ class StopWordsUtill:
         newParagraph = ""
 
         while wordsListIndex < len(wordsList):
-            currentWord = self._removePunctuations(wordsList[wordsListIndex])
+            currentWord = self.removePunctuations(wordsList[wordsListIndex])
             if not self.isStopWord(currentWord):
                 newParagraph = newParagraph + " " + currentWord
             wordsListIndex = wordsListIndex + 1
         return newParagraph
 
-    def _removePunctuations(self, word: str):
+    def removePunctuations(self, word: str):
         if len(word) == 0:
             return ""
         ## lower case the word
