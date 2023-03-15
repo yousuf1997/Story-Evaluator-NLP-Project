@@ -61,20 +61,9 @@ class StoryQualityEvaluator:
 
         ## start from second sentence
         sentenceIndex = 1
-
-        ## add all vectors in the first sentence
-        sumVector = []
-        # wordVectorList = self._bertComputedSentences[1]["vector_values"]
-        meanDivider = 1
         meanVector = []
-        # for wordVector in wordVectorList:
-        #     ## get the vector
-        #     keys = wordVector.keys()
-        #     for key in keys:
-        #         sumVector = self._VECTOR_UTILL.performVectorArthimetic(sumVector, wordVector[key], "ADD")
-        #         meanDivider = meanDivider + 1
-        # sumVector = list(list(wordVectorList["vector_values"][0].keys())[0])
-        keyB = ''
+        startingWordBFromSentenceTwo = ''
+
         while sentenceIndex < len(self._bertComputedSentences):
             ## in the current sentence traverse the vector
             wordVectorList = self._bertComputedSentences[sentenceIndex]["vector_values"]
@@ -87,7 +76,7 @@ class StoryQualityEvaluator:
                     if len(meanVector) == 0:
                         ## push the current vector into the meanvector
                         meanVector.append(wordVector[key])
-                        keyB = key
+                        startingWordBFromSentenceTwo = key
                     meanVectorValue = np.mean(meanVector ,axis=0,dtype=np.float64).tolist()
                     ## compute moving cosine similarity
                     cosineSimilarityTest = 1 - distance.cosine(meanVectorValue, wordVector[key])
@@ -105,11 +94,12 @@ class StoryQualityEvaluator:
             ## calculate the cosine for the first b
             meanVector.pop(0)
             ## get the vector
-            bVector = self._bertComputedSentences[1]['vector_values'][0][keyB]
+            bVector = self._bertComputedSentences[1]['vector_values'][0][startingWordBFromSentenceTwo]
             meanVectorValue = np.mean(meanVector ,axis=0,dtype=np.float64).tolist()
-            cSim = 1 - distance.cosine(meanVectorValue, wordVector[key])
+            cSim = 1 - distance.cosine(meanVectorValue, bVector)
             self._bertComputedSentences[1]['moving_cosine_similarity'][0]=cSim
-        print(self._bertComputedSentences)
+
+
     def plotCosineSimilaritiesBySentenceWord(self):
         x_axis = []
         y_axis = []
