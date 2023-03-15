@@ -98,7 +98,7 @@ class BertProcessor:
         for token in tokenEmbeddings:
             # `token` is a [12 x 768] tensor
             # Sum the vectors from the last four layers.
-            # sum_vec = torch.sum(token[-4:], dim=0)
+            sum_vec = torch.sum(token[-4:], dim=0)
             # Concatenate the vectors (that is, append them together) from the last
             # four layers.
             # Each layer vector is 768 values, so `cat_vec` is length 3,072.
@@ -174,7 +174,8 @@ class BertProcessor:
         index = 0
         while index < len(currentWordTokenList):
             ## first five values of the vector
-            vectorsForTokens.append(tokenVectorSum[tokenIndex][:5])
+            # vectorsForTokens.append(tokenVectorSum[tokenIndex][:5])
+            vectorsForTokens.append(tokenVectorSum[tokenIndex])
             tokenIndex = tokenIndex + 1
             index = index + 1
 
