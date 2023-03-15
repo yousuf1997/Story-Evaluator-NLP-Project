@@ -12,6 +12,7 @@ from utills.VectorUtill import VectorUtill
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.spatial import distance
 
 class StoryQualityEvaluator:
 
@@ -46,9 +47,9 @@ class StoryQualityEvaluator:
 
         while index < len(sentenceList):
             rawBatchList = sentenceList[index:index+3]
-            nonStopWordBatchList = self._removeStopWordsForBatch(rawBatchList)
-            nonEntityBatchList = self._ENTITY_REMOVER_UTILL.removeEntities(nonStopWordBatchList)
-            self.bert.process(nonEntityBatchList)
+            nonEntityBatchList = self._ENTITY_REMOVER_UTILL.removeEntities(rawBatchList)
+            nonStopWordBatchList = self._removeStopWordsForBatch(nonEntityBatchList)
+            self.bert.process(nonStopWordBatchList)
             wordVectorList = self.bert.getWordVectorListByBatch()
             self._appendComputedBatches(rawBatchList, nonStopWordBatchList, nonEntityBatchList, wordVectorList)
             index = index + 3
@@ -89,7 +90,8 @@ class StoryQualityEvaluator:
                         ## push the current vector into the meanvector
                         meanVector.append(wordVector[key])
                     meanVectorValue = np.mean(meanVector ,axis=0,dtype=np.float64).tolist()
-                    cosineSimilarityTest = self._VECTOR_UTILL.computeCosineSimilarity(meanVectorValue, wordVector[key])
+                    ## cosineSimilarityTest = self._VECTOR_UTILL.computeCosineSimilarity(meanVectorValue, wordVector[key])
+                    cosineSimilarityTest = distance.cosine(meanVectorValue, wordVector[key])
                     ## append the current key for next processing
                     meanVector.append(wordVector[key])
 
@@ -112,15 +114,18 @@ class StoryQualityEvaluator:
             cosineSimList = sentenceData['moving_cosine_similarity']
             wordList = sentenceData["vector_values"]
             for wordIndex,cosineData in enumerate(cosineSimList):
-                x_axis.append(str(index) + "_" + list(wordList[wordIndex].keys())[0])
+                x_axis.append(str(index + 1) + "_" + list(wordList[wordIndex].keys())[0])
                 y_axis.append(float(cosineData))
         ## sort
         ## plot the graph
         # data
         copyList = y_axis.copy()
         copyList.sort()
-        plt.bar(range(len(x_axis)), y_axis, color='blue')
-        plt.xticks(ticks=range(len(x_axis)), labels=x_axis)
+        plt.plot(range(len(x_axis)), y_axis, color='green')
+        plt.title("Moving cosine similarity")
+        plt.ylabel("Cosine Similarity")
+        plt.xlabel("Words by sentence")
+        plt.xticks(ticks=range(len(x_axis)), labels=x_axis, rotation = 90)
         plt.show()
 
 
@@ -135,8 +140,8 @@ class StoryQualityEvaluator:
         while index < len(rawBatchList):
             computedSentences = {}
             computedSentences["raw_batch"] = rawBatchList[index]
-            computedSentences["non_stop_word_batch"] = nonStopWordBatchList[index]
             computedSentences["non_entity_batch"] = nonEntityBatchList[index]
+            computedSentences["non_stop_word_batch"] = nonStopWordBatchList[index]
             computedSentences["vector_values"] = wordVectorList[index]
             computedSentences["moving_cosine_similarity"] = []
             self._bertComputedSentences.append(computedSentences)

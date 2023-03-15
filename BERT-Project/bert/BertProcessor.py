@@ -4,7 +4,7 @@ from transformers import BertTokenizer, BertModel
 from utills.SentenceUtill import SentenceUtill
 from utills.StopWordUtill import StopWordsUtill
 from utills.VectorUtill import VectorUtill
-
+from scipy.spatial.distance import cosine
 '''
     This class represent the bert model for the word embedding, and all the transformation stuff happens here
     Make sure the transform is installed
@@ -98,9 +98,13 @@ class BertProcessor:
         for token in tokenEmbeddings:
             # `token` is a [12 x 768] tensor
             # Sum the vectors from the last four layers.
-            sum_vec = torch.sum(token[-4:], dim=0)
+            # sum_vec = torch.sum(token[-4:], dim=0)
+            # Concatenate the vectors (that is, append them together) from the last
+            # four layers.
+            # Each layer vector is 768 values, so `cat_vec` is length 3,072.
+            cat_vec = torch.cat((token[-1], token[-2], token[-3], token[-4]), dim=0)
             # Use `sum_vec` to represent `token`.
-            tokenVectorSum.append(sum_vec)
+            tokenVectorSum.append(cat_vec)
 
         ## convert inputIds for current batch to tokens
         currentBatchTokens = self._tokenConverter.convert_ids_to_tokens(inputIdList[batchIndex])

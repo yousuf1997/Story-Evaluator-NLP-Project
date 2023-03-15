@@ -1,6 +1,5 @@
 
 '''
-
     This class represents stop words dictionary, and has functionality to check a word belongs to stop words
     source of the words : https://countwordsfree.com/stopwords
 '''
@@ -145,7 +144,7 @@ class StopWordsUtill:
             return ""
         ## lower case the word
         word = word.lower()
-        puntuationList = [",",":",".", "?", ";", ":", "/", "(", ")", "-"]
+        puntuationList = [",",":",".", "?", ";", ":", "/", "(", ")", "-","!", "`", "’"]
         charIndex = 0
         newWord = ""
         while charIndex < len(word):
