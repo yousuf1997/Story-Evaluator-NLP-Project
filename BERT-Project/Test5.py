@@ -1,5 +1,7 @@
-import numpy as np
+from utills.OutlierUtill import OutlierUtill
 
-a = np.array([[1, 2],[1,2]])
+utill = OutlierUtill()
 
-print(np.mean(a,axis=0,dtype=np.float64).tolist())
+data = [27, 2, 22, 29, 19, 30, 32, 59, 52, 35]
+
+utill.calculateOutlier(data)
