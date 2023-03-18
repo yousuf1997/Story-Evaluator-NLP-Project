@@ -115,7 +115,7 @@ class StoryQualityEvaluator:
                 x_axis.append(str(index + 1) + "_" + list(wordList[wordIndex].keys())[0])
                 y_axis.append(float(cosineData))
                 flattenData = {}
-                flattenData['sentenceIndex'] = str(index + 1)
+                flattenData['sentenceIndex'] = str(index)
                 flattenData['word'] = str(list(wordList[wordIndex].keys())[0])
                 flattenData['similarityScore'] = float(cosineData)
                 self._flattenMapOfWordAndConsineSimlarities.append(flattenData)
@@ -137,7 +137,44 @@ class StoryQualityEvaluator:
         plt.ylabel("Cosine Similarity")
         plt.xlabel("Words by sentence")
         plt.xticks(ticks=range(len(x_axis)), labels=x_axis, rotation = 90)
+        self._searchForOutlierAndComputerQuantitativeMeasure()
         plt.show()
+
+
+    def _searchForOutlierAndComputerQuantitativeMeasure(self):
+
+        ## need to find outliers from exactly two sentences
+        index = 0
+        outlierMap = []
+
+        while index < len(self._flattenMapOfWordAndConsineSimlarities):
+            currentData = self._flattenMapOfWordAndConsineSimlarities[index]
+            currentScore = currentData['similarityScore']
+            if currentScore < self._outlierMap['lowerBound'] or currentScore > self._outlierMap['upperBound']:
+                outlierMap.append(currentData)
+            index = index + 1
+
+        print('Outlier : ', outlierMap)
+
+        ## check if the are same two different sentence
+        sentenceCount = 0
+        previousSentenceIndex = ''
+        index = 0
+
+        while index < len(outlierMap):
+            currentSentenceIndex = int(outlierMap[index]['sentenceIndex'])
+            if index == 0:
+                previousSentenceIndex = currentSentenceIndex
+                sentenceCount = sentenceCount + 1
+            if previousSentenceIndex != currentSentenceIndex:
+                sentenceCount = sentenceCount + 1
+                previousSentenceIndex = currentSentenceIndex
+            index = index + 1
+
+        if sentenceCount == 2:
+            print("We have outliers are from exactly two sentence.")
+        elif sentenceCount > 2 or sentenceCount < 2:
+            print("We have outliers are from more than two sentence or less than two sentence or no outlier")
 
     def _removeStopWordsForBatch(self, rawBatchList):
         nonStopWordBatchList = []
