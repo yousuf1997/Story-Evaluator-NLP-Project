@@ -34,11 +34,5 @@ class OutlierUtill:
         ## find lower boundary
         lowerBound = Q1 - ((1.5) * IQR)
 
-        print("lowerbound ", lowerBound, " upperbound ", upperBound, Q1, Q3)
-        for d in data:
-
-            if d < lowerBound:
-                print("Lower bound outlier : ", d)
-            if d > upperBound:
-                print("Upper bound outlier : ", d)
+        return {"lowerBound": lowerBound, "upperBound" : upperBound}
 

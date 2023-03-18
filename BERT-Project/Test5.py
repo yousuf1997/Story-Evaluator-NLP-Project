@@ -1,7 +1,6 @@
 from utills.OutlierUtill import OutlierUtill
 
-utill = OutlierUtill()
+outlier = OutlierUtill()
 
-data = [27, 2, 22, 29, 19, 30, 32, 59, 52, 35]
 
-utill.calculateOutlier(data)
+print(outlier.calculateOutlier([27, 2, 22, 29, 19, 30, 32, 59, 52, 35]))

@@ -7,7 +7,7 @@
 class StopWordsUtill:
     def __init__(self):
         self._stopWordList = [];
-        self.stopInit()
+        self._buildStopWordMap()
 
     def test(self):
         self._stopWordList = ['a', 'an', 'the', 'and', 'but', 'or', 'as', 'at', 'by', 'for', 'in', 'of', 'on', 'to', 'up', 'with']
@@ -124,7 +124,7 @@ class StopWordsUtill:
                               "suggest" ,"thered" ,"thereof" ,"therere" ,"thereto" ,"theyd" ,"theyre" ,"thou"
             ,"thoughh" ,"thousand" ,"throug" ,"til" ,"tip" ,"ts" ,"ups" ,"usefully" ,"usefulness"
             ,"'ve" ,"vol" ,"vols" ,"wed" ,"whats" ,"wheres" ,"whim" ,"whod" ,"whos" ,"widely" ,"words"
-            ,"world" ,"youd" ,"youre" , '\"']
+            ,"world" ,"youd" ,"youre" ,"'", "'", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
 
     def isStopWord(self, word):
         return word in self._stopWordList

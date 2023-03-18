@@ -8,6 +8,7 @@ import math
 
 from bert.BertProcessor import BertProcessor
 from utills.EntityRemoverUtill import EntityRemoverUtill
+from utills.OutlierUtill import OutlierUtill
 from utills.SentenceUtill import SentenceUtill
 from utills.StopWordUtill import StopWordsUtill
 from utills.VectorUtill import VectorUtill
@@ -31,6 +32,8 @@ class StoryQualityEvaluator:
         self._ENTITY_REMOVER_UTILL = EntityRemoverUtill()
         # vector utils
         self._VECTOR_UTILL = VectorUtill();
+        ## outlier util
+        self._OUTLIER_UTILL =  OutlierUtill()
         # batch
         self._bertComputedSentences = []
 
@@ -103,24 +106,38 @@ class StoryQualityEvaluator:
     def plotCosineSimilaritiesBySentenceWord(self):
         x_axis = []
         y_axis = []
+        self._flattenMapOfWordAndConsineSimlarities = []
         for index, sentenceData in enumerate(self._bertComputedSentences):
             cosineSimList = sentenceData['moving_cosine_similarity']
             wordList = sentenceData["vector_values"]
+
             for wordIndex,cosineData in enumerate(cosineSimList):
                 x_axis.append(str(index + 1) + "_" + list(wordList[wordIndex].keys())[0])
                 y_axis.append(float(cosineData))
-        ## sort
+                flattenData = {}
+                flattenData['sentenceIndex'] = str(index + 1)
+                flattenData['word'] = str(list(wordList[wordIndex].keys())[0])
+                flattenData['similarityScore'] = float(cosineData)
+                self._flattenMapOfWordAndConsineSimlarities.append(flattenData)
+
+        outlierMap = self._OUTLIER_UTILL.calculateOutlier(y_axis.copy())
+        ## store that in outlier map
+        self._outlierMap = outlierMap
         ## plot the graph
-        # data
         copyList = y_axis.copy()
         copyList.sort()
+        fig = plt.figure()
+        fig.subplots_adjust(top=0.85)
+        fig.suptitle('Outlier Bounds [Lower Bound : ' + str(outlierMap["lowerBound"]) + " , Upper Bound : " + str(outlierMap["upperBound"]) + " ]", fontsize=12, fontweight='bold')
+        # Set titles for the figure and the subplot respectively
         plt.plot(range(len(x_axis)), y_axis, color='green')
+        plt.axhline(y = outlierMap["lowerBound"], color = 'r', linestyle = 'dashed')
+        plt.axhline(y = outlierMap["upperBound"] if outlierMap["upperBound"] <= 1 else 1, color = 'b', linestyle = 'dashed')
         plt.title("Moving cosine similarity")
         plt.ylabel("Cosine Similarity")
         plt.xlabel("Words by sentence")
         plt.xticks(ticks=range(len(x_axis)), labels=x_axis, rotation = 90)
         plt.show()
-
 
     def _removeStopWordsForBatch(self, rawBatchList):
         nonStopWordBatchList = []
