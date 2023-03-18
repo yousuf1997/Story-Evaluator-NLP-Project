@@ -128,7 +128,6 @@ class StoryQualityEvaluator:
         copyList.sort()
         fig = plt.figure()
         fig.subplots_adjust(top=0.85)
-        fig.suptitle('Outlier Bounds [Lower Bound : ' + str(outlierMap["lowerBound"]) + " , Upper Bound : " + str(outlierMap["upperBound"]) + " ]", fontsize=12, fontweight='bold')
         # Set titles for the figure and the subplot respectively
         plt.plot(range(len(x_axis)), y_axis, color='green')
         plt.axhline(y = outlierMap["lowerBound"], color = 'r', linestyle = 'dashed')
@@ -137,15 +136,19 @@ class StoryQualityEvaluator:
         plt.ylabel("Cosine Similarity")
         plt.xlabel("Words by sentence")
         plt.xticks(ticks=range(len(x_axis)), labels=x_axis, rotation = 90)
-        self._searchForOutlierAndComputerQuantitativeMeasure()
+        M_SCORE = self._searchForOutlierAndComputerQuantitativeMeasure()
+        fig.suptitle('Outlier Bounds [Lower Bound : ' + str(outlierMap["lowerBound"]) + " , Upper Bound : " + str(outlierMap["upperBound"]) + " ], M = " + str(M_SCORE), fontsize=12, fontweight='bold')
         plt.show()
 
 
     def _searchForOutlierAndComputerQuantitativeMeasure(self):
-
         ## need to find outliers from exactly two sentences
         index = 0
         outlierMap = []
+        ## check if the are same two different sentence
+        sentenceCount = 0
+        previousSentenceIndex = ''
+        index = 0
 
         while index < len(self._flattenMapOfWordAndConsineSimlarities):
             currentData = self._flattenMapOfWordAndConsineSimlarities[index]
@@ -155,11 +158,6 @@ class StoryQualityEvaluator:
             index = index + 1
 
         print('Outlier : ', outlierMap)
-
-        ## check if the are same two different sentence
-        sentenceCount = 0
-        previousSentenceIndex = ''
-        index = 0
 
         while index < len(outlierMap):
             currentSentenceIndex = int(outlierMap[index]['sentenceIndex'])
@@ -175,6 +173,8 @@ class StoryQualityEvaluator:
             print("We have outliers are from exactly two sentence.")
         elif sentenceCount > 2 or sentenceCount < 2:
             print("We have outliers are from more than two sentence or less than two sentence or no outlier")
+        return 0.0
+
 
     def _removeStopWordsForBatch(self, rawBatchList):
         nonStopWordBatchList = []
