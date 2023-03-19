@@ -118,6 +118,7 @@ class StoryQualityEvaluator:
                 flattenData['sentenceIndex'] = str(index)
                 flattenData['word'] = str(list(wordList[wordIndex].keys())[0])
                 flattenData['similarityScore'] = float(cosineData)
+                flattenData['wordIndex'] = wordIndex
                 self._flattenMapOfWordAndConsineSimlarities.append(flattenData)
 
         outlierMap = self._OUTLIER_UTILL.calculateOutlier(y_axis.copy())
