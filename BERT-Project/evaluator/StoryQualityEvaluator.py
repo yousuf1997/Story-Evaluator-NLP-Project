@@ -14,9 +14,7 @@ from utills.StopWordUtill import StopWordsUtill
 from utills.VectorUtill import VectorUtill
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from scipy.spatial import distance
-from sklearn.metrics.pairwise import cosine_similarity
 
 class StoryQualityEvaluator:
 
@@ -117,6 +115,7 @@ class StoryQualityEvaluator:
                 flattenData = {}
                 flattenData['sentenceIndex'] = str(index)
                 flattenData['word'] = str(list(wordList[wordIndex].keys())[0])
+                flattenData['vector'] = wordList[wordIndex][flattenData['word']]
                 flattenData['similarityScore'] = float(cosineData)
                 flattenData['wordIndex'] = wordIndex
                 self._flattenMapOfWordAndConsineSimlarities.append(flattenData)
@@ -138,45 +137,75 @@ class StoryQualityEvaluator:
         plt.xlabel("Words by sentence")
         plt.xticks(ticks=range(len(x_axis)), labels=x_axis, rotation = 90)
         M_SCORE = self._searchForOutlierAndComputerQuantitativeMeasure()
-        fig.suptitle('Outlier Bounds [Lower Bound : ' + str(outlierMap["lowerBound"]) + " , Upper Bound : " + str(outlierMap["upperBound"]) + " ], M = " + str(M_SCORE), fontsize=12, fontweight='bold')
+        fig.suptitle("M = " + str(M_SCORE), fontsize=12, fontweight='bold')
         plt.show()
 
 
     def _searchForOutlierAndComputerQuantitativeMeasure(self):
-        ## need to find outliers from exactly two sentences
-        index = 0
+        ## need to find outliers from exactly two sentence
         outlierMap = []
-        ## check if the are same two different sentence
-        sentenceCount = 0
-        previousSentenceIndex = ''
         index = 0
-
+        outlierVector = []
+        allWordVectors = []
+        outlierSentenceSet = set()
         while index < len(self._flattenMapOfWordAndConsineSimlarities):
             currentData = self._flattenMapOfWordAndConsineSimlarities[index]
             currentScore = currentData['similarityScore']
             if currentScore < self._outlierMap['lowerBound'] or currentScore > self._outlierMap['upperBound']:
                 outlierMap.append(currentData)
+                outlierVector.append(currentData['vector'])
             index = index + 1
-
+            allWordVectors.append(currentData['vector'])
         print('Outlier : ', outlierMap)
-
+        index = 0
         while index < len(outlierMap):
             currentSentenceIndex = int(outlierMap[index]['sentenceIndex'])
-            if index == 0:
-                previousSentenceIndex = currentSentenceIndex
-                sentenceCount = sentenceCount + 1
-            if previousSentenceIndex != currentSentenceIndex:
-                sentenceCount = sentenceCount + 1
-                previousSentenceIndex = currentSentenceIndex
+            outlierSentenceSet.add(currentSentenceIndex)
+            index = index + 1
+        if len(outlierSentenceSet) > 2 or len(outlierSentenceSet) < 2:
+            print("We have outliers are from more than two sentence or less than two sentence or no outlier")
+            return 0.0
+
+        print("We have outliers are from exactly two sentence.")
+        outlierMeanVector = np.mean(outlierVector ,axis=0,dtype=np.float64).tolist()
+        allWordVectorMean = np.mean(allWordVectors,axis=0,dtype=np.float64).tolist()
+
+        A =  1 - distance.cosine(outlierMeanVector, allWordVectorMean)
+        B = self._calculateBMean(outlierMap)
+        print("A : ", A)
+        print("B : ", B)
+        M = float((A + abs(B)) / 3)
+
+        return M
+
+    def _calculateBMean(self, outlierMap):
+        cosineSimList = []
+        index = 0
+
+        while index < len(outlierMap):
+            currentData = outlierMap[index]
+            leftIndex = index - 1
+            rightIndex = index + 1
+            allOtherVectors = []
+            while leftIndex >= 0:
+                allOtherVectors.append(outlierMap[leftIndex]['vector'])
+                leftIndex = leftIndex - 1
+            while rightIndex < len(outlierMap):
+                allOtherVectors.append(outlierMap[rightIndex]['vector'])
+                rightIndex = rightIndex + 1
+            ## calculate the cosine sim of current outlier,and all otheroutlier
+            allWordVectorMean = np.mean(allOtherVectors,axis=0,dtype=np.float64).tolist()
+            cosineSim = 1 - distance.cosine(currentData['vector'], allWordVectorMean)
+            cosineSimList.append(cosineSim)
             index = index + 1
 
-        if sentenceCount == 2:
-            print("We have outliers are from exactly two sentence.")
-        elif sentenceCount > 2 or sentenceCount < 2:
-            print("We have outliers are from more than two sentence or less than two sentence or no outlier")
-        return 0.0
-
-
+        ## return the mean of the cosine
+        return np.mean(cosineSimList,axis=0,dtype=np.float64).tolist()
+    def _getWordVectorByWordIndex(self, sentenceIndex, wordIndex, word):
+        ## get the sentence from the bert computed map
+        sentenceMap = self._bertComputedSentences[int(sentenceIndex)]
+        vector = sentenceMap['vector_values'][wordIndex][word]
+        return vector
     def _removeStopWordsForBatch(self, rawBatchList):
         nonStopWordBatchList = []
         for batch in rawBatchList:
