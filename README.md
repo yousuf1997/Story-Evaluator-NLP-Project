@@ -15,11 +15,10 @@ BertTest.py is the driver file to execute the program. Sample call to run the pr
 ```
 from evaluator.StoryQualityEvaluator import StoryQualityEvaluator
 
-## bertProcessor = BertProcessor()
 storyQualityEvaluator = StoryQualityEvaluator()
 
 storyQualityEvaluator.initiateBertProcess(STORY_TEXT)
 storyQualityEvaluator.computeMovingCosineSimilarity()
 storyQualityEvaluator.plotCosineSimilaritiesBySentenceWord()
 ```
-
+The above command will produce a graph with plotting the running cosine similarity. 
