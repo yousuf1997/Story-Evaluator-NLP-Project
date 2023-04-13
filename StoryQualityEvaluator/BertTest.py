@@ -49,6 +49,12 @@ p19 = "Samantha was a successful detective, but she had a secret that she kept h
 
 p20 = "Once upon a time, there was a small village nestled in the mountains. The people of the village were content with their simple way of life and found joy in the little things. One day, a traveling storyteller came to the village and shared a tale of great adventure and heroism.The villagers listened with rapt attention, amazed at the incredible story they had just heard. But as the storyteller left, the villagers began to talk amongst themselves, each sharing their own interpretation of the tale.Some saw it as a thrilling adventure, while others found it to be a cautionary tale of the dangers of greed and ambition. Still, others found the story to be lacking in substance and depth, and criticized the storyteller for his simplistic narrative.The debate continued for days, with each person seeing the story through their own unique lens. In the end, the storyteller returned to the village, and the villagers asked him to share another tale. But this time, they listened with a newfound understanding that the quality of a story is truly a matter of perception.And so, they enjoyed the tale for what it was, without judgment or criticism, appreciating the beauty and richness of the story as they saw it."
 
-storyQualityEvaluator.initiateBertProcess(p20)
+p21 = "As she searched frantically for her engagement ring, she noticed a small crack in the window. Her heart sank as she realized the thief had returned."
+
+p22 = "Sarah woke up to a beautiful sunrise on the day of her wedding. She couldn't believe how perfect everything was going. But as she walked down the aisle, a sudden gust of wind blew out all the candles in the church. She knew it was a sign, but it was too late to turn back."
+
+p23 = "The young couple was on their honeymoon in Hawaii when they decided to go for a hike in the mountains. As they climbed higher and higher, they noticed that the sky was getting darker and darker. They should have turned back, but they didn't. By the time they reached the summit, a thunderstorm was raging all around them."
+
+storyQualityEvaluator.initiateBertProcess(p23)
 storyQualityEvaluator.computeMovingCosineSimilarity()
 storyQualityEvaluator.plotCosineSimilaritiesBySentenceWord()
