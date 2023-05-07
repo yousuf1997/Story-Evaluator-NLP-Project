@@ -1,6 +1,9 @@
 # CS-5990-Term-Project
 This repo contains code which implements the method discussed in the following paper : https://ojs.aaai.org/index.php/AIIDE/article/view/5217 as a part of CS-5990 course's term project from my graduate school (CSU Pomona)
 
+#### Overall Architecture 
+![alt text](https://raw.githubusercontent.com/yousuf1997/CS-5990-Term-Project/main/flow_chart.drawio.svg)
+
 ### Dependency Libraries 
 ```
 pip install torch 
@@ -30,3 +33,4 @@ Shahjahan, the Mughal emperor, sat on his throne, lost in thought. His mind was 
 ```
 #### Results
 ![Results of running the above story.](https://github.com/yousuf1997/CS-5990-Term-Project/blob/main/StoryQualityEvaluator/experiment-results/Result_1.png)
+
