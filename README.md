@@ -14,7 +14,7 @@ pip install https://github.com/explosion/spacymodels/releases/download/en_core_w
 python -m spacy download en_core_web_sm
 ```
 ### Driver File
-BertTest.py is the driver file to execute the program. Sample call to run the program
+Experiment.py is the driver file to execute the program. Sample call to run the program
 ```
 from evaluator.StoryQualityEvaluator import StoryQualityEvaluator
 
