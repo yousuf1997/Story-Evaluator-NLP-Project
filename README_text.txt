@@ -10,3 +10,5 @@ Once you have pasted and run the above text paste this
 "python -m spacy download en_core_web_sm"
 
 Now you have installed all the required modules to run the implemented code and can check how the logic responds to different stories along with the elements of hint and foreshadowing in them.
+
+Link to the repo: https://github.com/yousuf1997
